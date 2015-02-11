@@ -24,31 +24,33 @@ namespace Valentines2014
     /// </summary>
     public partial class MainWindow : Window
     {
-        Queue<LyricString> LyricsQueue = new Queue<LyricString>();
+        Queue<LyricString> LyricsQueue = new Queue<LyricString>();        
 
         public MainWindow()
         {
             InitializeComponent();
-            this.PrintReady += MainWindow_PrintReady;
-            PlayValentine();
+            
+            if (this.PrintReady == null)
+            {
+                this.PrintReady += MainWindow_PrintReady;
+            }
         }
 
-        private void PlayValentine()
-        {                    
-            //Solution-relative file.
-            MusicBox eightMelodiesBox = new MusicBox(new Uri("Valentines2014;component/8_melodies_musicbox.txt", UriKind.Relative));
-            FillQueue(eightMelodiesBox);
-            if (!String.IsNullOrEmpty(eightMelodiesBox.MusicFile))
+        private void PlayValentine(string scriptPath)
+        {
+            MusicBox box = new MusicBox(scriptPath);
+            FillQueue(box);
+            if (!String.IsNullOrEmpty(box.MusicFile))
             {
-                SoundPlayer player = new SoundPlayer(eightMelodiesBox.MusicFile);
+                SoundPlayer player = new SoundPlayer(box.MusicFile);
                 player.Play();
-            }            
+            }
             MainWindow_PrintReady(null, null);
         }
 
         private void FillQueue(MusicBox box)
         {
-            foreach(LyricString lyr in box.Lyrics)
+            foreach (LyricString lyr in box.Lyrics)
             {
                 LyricsQueue.Enqueue(lyr);
             }
@@ -103,7 +105,12 @@ namespace Valentines2014
 
         private void OpenMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            var open = new OpenWindow();
 
+            if (open.ShowDialog() == true)
+            {
+                PlayValentine(open.ReturnSelection.Path);
+            }
         }
     }
 }

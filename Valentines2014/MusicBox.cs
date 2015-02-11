@@ -36,6 +36,10 @@ namespace Valentines2014
             }
         }
 
+        /// <summary>
+        /// Creates a new MusicBox from an external text file included with the project as a Resource.
+        /// </summary>
+        /// <param name="uri">The URI of the resource text file.</param>
         public MusicBox(Uri uri)
         {
             using (StreamReader sr = new StreamReader(Application.GetResourceStream(uri).Stream))
@@ -45,11 +49,10 @@ namespace Valentines2014
         }
 
         private void ImportMusicBox(StreamReader sr)
-        {
-            if (Lyrics == null)
-            {
-                Lyrics = new List<LyricString>();
-            }
+        {            
+            Lyrics = new List<LyricString>(); //Init, or clear previous.
+
+            sr.ReadLine(); //Skip the header line
             MusicFile = Path.GetFullPath(sr.ReadLine());
             while (!sr.EndOfStream)
             {
