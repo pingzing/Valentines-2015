@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Media;
@@ -36,14 +37,36 @@ namespace Valentines2014
             }
         }
 
+        MediaPlayer mp3Player = new MediaPlayer();
         private void PlayValentine(string scriptPath)
         {
             MusicBox box = new MusicBox(scriptPath);
             FillQueue(box);
             if (!String.IsNullOrEmpty(box.MusicFile))
             {
-                SoundPlayer player = new SoundPlayer(box.MusicFile);
-                player.Play();
+                if (Path.GetExtension(box.MusicFile) == ".wav")
+                {
+                    SoundPlayer player = new SoundPlayer(box.MusicFile);
+                    player.Play();
+                }
+                else if(Path.GetExtension(box.MusicFile) == ".mp3")
+                {                    
+                    mp3Player.Stop();
+                    mp3Player.Open(new Uri(box.MusicFile));
+                    BackgroundWorker worker = new BackgroundWorker();   
+                    //On a Background worker so it doesn't stop playing when the DispatcherTimer in PrintReady updates.
+                    //Then, invoked through the Dispatcher so it has access to the global MediaPlayer.
+                    //MediaPlayer is global so we can only have one MP3 playing at a time!
+                    worker.DoWork += (s, e) =>
+                    {
+                        this.Dispatcher.Invoke(() =>
+                        {
+                            MediaPlayer threadLocalPlayer = e.Argument as MediaPlayer;
+                            threadLocalPlayer.Play();
+                        });                        
+                    };
+                    worker.RunWorkerAsync(mp3Player);
+                }
             }
             MainWindow_PrintReady(null, null);
         }
@@ -109,7 +132,14 @@ namespace Valentines2014
 
             if (open.ShowDialog() == true)
             {
-                PlayValentine(open.ReturnSelection.Path);
+                try
+                {
+                    PlayValentine(open.ReturnSelection.Path);
+                }         
+                catch(FileNotFoundException ex)
+                {
+                    MessageBox.Show("Could not find file at " + ex.FileName + ".", "Error - File not found", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
     }

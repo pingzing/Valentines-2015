@@ -12,7 +12,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Valentines2014
 {
@@ -36,7 +35,7 @@ namespace Valentines2014
         private void PopulateMusicBoxList()
         {
             scriptList = new List<MusicBoxScript>();
-            string searchDir = System.AppDomain.CurrentDomain.BaseDirectory;
+            string searchDir = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Scripts");
             IEnumerable<string> txtFiles = Directory.EnumerateFiles(searchDir, "*.txt", SearchOption.TopDirectoryOnly);
             AddScriptFilesToListBox(txtFiles);
         }
@@ -79,6 +78,11 @@ namespace Valentines2014
             ReturnSelection = (MusicBoxScript)MusicBoxListBox.SelectedItem;
             this.DialogResult = true;
             this.Close();
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 

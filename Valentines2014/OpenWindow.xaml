@@ -5,18 +5,21 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300" 
         Height="300" Width="300"
-        Title="OpenPage" Background="Black">
+        Title="Open Music Box" Background="Black">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <ListBox x:Name="MusicBoxListBox" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="Auto" Height="Auto"/>
-        <Button x:Name="AddButton" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5" Content="Add" Click="AddButton_Click" />
-        <Button x:Name="PlayButton" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,5,5" Content="Play" Click="PlayButton_Click"/>
+        <ListBox x:Name="MusicBoxListBox" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"/>
+        <Button x:Name="AddButton" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Width="75" Margin="5" Content="Add" Click="AddButton_Click" />
+        <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Bottom">
+        <Button x:Name="PlayButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="75" Margin="0,0,5,5" Content="Play" Click="PlayButton_Click"/>
+        <Button x:Name="CancelButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="75" Margin="0,0,5,5" Content="Cancel" Click="CancelButton_Click" IsCancel="True"/>
+        </StackPanel>
     </Grid>
 </Window>
