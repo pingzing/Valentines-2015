@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Valentines2014.Properties {
+namespace Valentines2015.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

@@ -13,7 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 
-namespace Valentines2014
+namespace Valentines2015
 {
     /// <summary>
     /// Interaction logic for OpenWindow.xaml

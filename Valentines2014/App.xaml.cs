@@ -5,7 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Windows;
 
-namespace Valentines2014
+namespace Valentines2015
 {
     /// <summary>
     /// Interaction logic for App.xaml
