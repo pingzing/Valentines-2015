@@ -44,6 +44,10 @@ namespace Valentines2014
             FillQueue(box);
             if (!String.IsNullOrEmpty(box.MusicFile))
             {
+                if(!File.Exists(box.MusicFile))
+                {
+                    throw new FileNotFoundException("Sound file not found in PlayValentine.", box.MusicFile);
+                }
                 if (Path.GetExtension(box.MusicFile) == ".wav")
                 {
                     SoundPlayer player = new SoundPlayer(box.MusicFile);
@@ -66,6 +70,10 @@ namespace Valentines2014
                         });                        
                     };
                     worker.RunWorkerAsync(mp3Player);
+                }
+                else
+                {
+                    throw new ArgumentException("Extension is not .mp3 or .wav.", box.MusicFile);                   
                 }
             }
             MainWindow_PrintReady(null, null);
@@ -139,6 +147,10 @@ namespace Valentines2014
                 catch(FileNotFoundException ex)
                 {
                     MessageBox.Show("Could not find file at " + ex.FileName + ".", "Error - File not found", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch(ArgumentException ex)
+                {
+                    MessageBox.Show(ex.ParamName + " is not an MP3 or a WAV.", "Error - Invalid file", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
