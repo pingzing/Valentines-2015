@@ -15,10 +15,12 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <ListBox x:Name="MusicBoxListBox" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"/>
+        <ListBox x:Name="MusicBoxListBox" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"
+                 SelectionChanged="MusicBoxListBox_OnSelectionChanged"/>
         <Button x:Name="AddButton" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" Width="75" Margin="5" Content="Add" Click="AddButton_Click" />
         <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Bottom">
-        <Button x:Name="PlayButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="75" Margin="0,0,5,5" Content="Play" Click="PlayButton_Click"/>
+            <Button x:Name="PlayButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="75" Margin="0,0,5,5" Content="Play" 
+                    Click="PlayButton_Click" IsEnabled="{Binding PlayEnabled}"/>
         <Button x:Name="CancelButton" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="75" Margin="0,0,5,5" Content="Cancel" Click="CancelButton_Click" IsCancel="True"/>
         </StackPanel>
     </Grid>

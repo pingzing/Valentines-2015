@@ -190,3 +190,4 @@ ModelManifest.xml
 
 #Audio files
 *.wav
+*.DotSettings

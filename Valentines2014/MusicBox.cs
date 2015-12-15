@@ -27,12 +27,12 @@ namespace Valentines2015
         /// <summary>
         /// Creates a new MusicBox from an external text file.
         /// </summary>
-        /// <param name="externallyDefinedBox"></param>
+        /// <param name="externallyDefinedBox">Path to external file.</param>
         public MusicBox(string externallyDefinedBox)
         {
             using (StreamReader sr = new StreamReader(externallyDefinedBox))
             {
-                ImportMusicBox(sr);
+                ParseMusicScript(sr);
             }
         }
 
@@ -44,20 +44,40 @@ namespace Valentines2015
         {
             using (StreamReader sr = new StreamReader(Application.GetResourceStream(uri).Stream))
             {
-                ImportMusicBox(sr);
+                ParseMusicScript(sr);
             }
         }
 
-        private void ImportMusicBox(StreamReader sr)
+        private void ParseMusicScript(StreamReader sr)
         {            
             Lyrics = new List<LyricString>(); //Init, or clear previous.
 
-            sr.ReadLine(); //Skip the header line
-            MusicFile = Path.GetFullPath(sr.ReadLine());
+            int lineCount = 0;
             while (!sr.EndOfStream)
-            {
+            {                
+                string currentLine = sr.ReadLine();
+                if (currentLine == null)
+                {
+                    return;
+                }
+                if (currentLine[0] == '#')
+                {
+                    continue;
+                }
+
+                if (lineCount == 0)
+                {
+                    MusicFile = Path.GetFullPath(currentLine);
+                    if (!File.Exists(MusicFile))
+                    {
+                        throw new FileNotFoundException($"File {MusicFile} not found.", MusicFile);
+                    }
+                    lineCount++;
+                    continue;
+                }                
+
                 //Splitting on pipes ( | ), because commas are valid in song lyrics. Pipes usually aren't.
-                string[] line = (sr.ReadLine()).Split('|');
+                string[] line = currentLine.Split('|');
                 string lyric = line[0].Replace("\\n", "\n");
                 int writeTimeInMillis = Convert.ToInt32(line[1]);
                 int waitTimeInMillis = line.Length > 2 ? Convert.ToInt32(line[2]) : 0; //The waitTime is an optional value. If there's nothing there, set it to zero.
