@@ -2,46 +2,46 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Media;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Threading;
+using Valentines2014;
+using Valentines2015.MVVM;
 
 namespace Valentines2015
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : BindableWindowBase
     {
-        Queue<LyricString> LyricsQueue = new Queue<LyricString>();        
+        private readonly Queue<LyricString> _lyricsQueue = new Queue<LyricString>();
+        private readonly MediaPlayer _mp3Player = new MediaPlayer();
+        private SoundPlayer _wavPlayer = new SoundPlayer();
+        
 
         public MainWindow()
         {
-            InitializeComponent();
-            
-            if (this.PrintReady == null)
-            {
-                this.PrintReady += MainWindow_PrintReady;
-            }
-        }
-
-        MediaPlayer mp3Player = new MediaPlayer();
-        private void PlayValentine(string scriptPath)
+            InitializeComponent();                       
+        }        
+        private async Task PlayValentine(string scriptPath)
         {
             MusicBox box = new MusicBox(scriptPath);
-            FillQueue(box);
+            MainTextBlock.Text = "";
+            if(box.TextColor.HasValue)
+            {
+                MainTextBlock.Foreground = new SolidColorBrush(box.TextColor.Value);
+            }
+            else
+            {
+                MainTextBlock.Foreground = new SolidColorBrush(Colors.Red);
+            }
+            foreach (LyricString lyr in box.Lyrics)
+            {
+                _lyricsQueue.Enqueue(lyr);
+            }
             if (!String.IsNullOrEmpty(box.MusicFile))
             {
                 if(!File.Exists(box.MusicFile))
@@ -50,13 +50,13 @@ namespace Valentines2015
                 }
                 if (Path.GetExtension(box.MusicFile) == ".wav")
                 {
-                    SoundPlayer player = new SoundPlayer(box.MusicFile);
-                    player.Play();
+                    _wavPlayer = new SoundPlayer(box.MusicFile);
+                    _wavPlayer.Play();
                 }
                 else if(Path.GetExtension(box.MusicFile) == ".mp3")
                 {                    
-                    mp3Player.Stop();
-                    mp3Player.Open(new Uri(box.MusicFile));
+                    _mp3Player.Stop();
+                    _mp3Player.Open(new Uri(box.MusicFile));
                     BackgroundWorker worker = new BackgroundWorker();   
                     //On a Background worker so it doesn't stop playing when the DispatcherTimer in PrintReady updates.
                     //Then, invoked through the Dispatcher so it has access to the global MediaPlayer.
@@ -69,72 +69,55 @@ namespace Valentines2015
                             threadLocalPlayer.Play();
                         });                        
                     };
-                    worker.RunWorkerAsync(mp3Player);
+                    worker.RunWorkerAsync(_mp3Player);
                 }
                 else
                 {
                     throw new ArgumentException("Extension is not .mp3 or .wav.", box.MusicFile);                   
                 }
             }
-            MainWindow_PrintReady(null, null);
-        }
-
-        private void FillQueue(MusicBox box)
-        {
-            foreach (LyricString lyr in box.Lyrics)
+            await PrintLinesRecursive(null);
+        }        
+        
+        private async Task PrintLinesRecursive(LyricString previousLyric)
+        {            
+            //Wait out the previous Lyric's WaitTime.            
+            if (previousLyric != null)
             {
-                LyricsQueue.Enqueue(lyr);
-            }
-        }
-
-        //This may not even need to be an event handler.
-        async void MainWindow_PrintReady(object sender, EventArgs e)
-        {
-            //Wait out the previous Lyric's WaitTime.
-            LyricString oldLyr = sender as LyricString;
-            if (oldLyr != null)
-            {
-                await Task.Delay(oldLyr.MillisecondsToWait);
+                await Task.Delay(previousLyric.MillisecondsToWait);
             }
 
-            LyricString lyr = LyricsQueue.Dequeue();
+            LyricString lyr = _lyricsQueue.Dequeue();
             TimeSpan pauseTimeInMillis = new TimeSpan(0, 0, 0, 0, lyr.MillisecondsToWrite / lyr.Lyric.Length);
 
-            DispatcherTimer dTimer = new DispatcherTimer();
-            dTimer.Interval = pauseTimeInMillis;
+            DispatcherTimer dTimer = new DispatcherTimer
+            {
+                Interval = pauseTimeInMillis
+            };
 
-            //Each tick prints a single character & moves to next line if available
+            //Each tick prints a single character. If we're at the end of the line, 
+            //it stops the current timer-loop and makes a new method call.
             dTimer.Tick += (ob, ev) =>
                 {
-                    MainTextBlock.Text += lyr.Lyric[lyr.CurrentLetter];
-                    if (lyr.CurrentLetter == lyr.Lyric.Length - 1)
+                    MainTextBlock.Text += lyr.Lyric[lyr.CurrentLetterIndex];
+                    if (lyr.CurrentLetterIndex == lyr.Lyric.Length - 1)
                     {
                         dTimer.Stop();
-                        if (LyricsQueue.Count > 0)
+                        if (_lyricsQueue.Count > 0)
                         {
-                            MainWindow_PrintReady(lyr, null);
-                        }
+                            PrintLinesRecursive(lyr).AndIgnore(); 
+                        }                        
                     }
                     else
                     {
-                        lyr.CurrentLetter++;
+                        lyr.CurrentLetterIndex++;
                     }
                 };
             dTimer.Start();
         }
+              
 
-        private void OnPrintReady(object sender, EventArgs e)
-        {
-            EventHandler handler = PrintReady;
-            if (handler != null)
-            {
-                handler(sender, e);
-            }
-        }
-
-        public event EventHandler PrintReady;
-
-        private void OpenMenuItem_Click(object sender, RoutedEventArgs e)
+        private async void OpenMenuItem_Click(object sender, RoutedEventArgs e)
         {
             var open = new OpenWindow();
 
@@ -142,7 +125,7 @@ namespace Valentines2015
             {
                 try
                 {
-                    PlayValentine(open.ReturnSelection.Path);
+                    await PlayValentine(open.ReturnSelection.Path);
                 }         
                 catch(FileNotFoundException ex)
                 {
@@ -153,6 +136,6 @@ namespace Valentines2015
                     MessageBox.Show(ex.ParamName + " is not an MP3 or a WAV.", "Error - Invalid file", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-        }
+        }       
     }
 }

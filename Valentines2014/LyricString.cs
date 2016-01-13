@@ -8,33 +8,31 @@ namespace Valentines2015
     class LyricString
     {
         public string Lyric { get; set; }
-        public int CurrentLetter { get; set; }
+        public int CurrentLetterIndex { get; set; }
 
-        private int millisecondsToWrite = 0;
-        public int MillisecondsToWrite { get { return millisecondsToWrite; } set { millisecondsToWrite = value; } }
+        public int MillisecondsToWrite { get; set; } = 0;
 
-        private int millisecondsToWait = 0;
-        public int MillisecondsToWait { get { return millisecondsToWait; } set { millisecondsToWait = value; } }    
+        public int MillisecondsToWait { get; set; } = 0;
 
         public LyricString(string newLyric)
         {
             Lyric = newLyric;
-            millisecondsToWrite = 0;
-            millisecondsToWait = 0;
+            MillisecondsToWrite = 0;
+            MillisecondsToWait = 0;
         }
 
         public LyricString(string newLyric, int newMsToWrite)
         {
             Lyric = newLyric;
-            millisecondsToWrite = newMsToWrite;
-            millisecondsToWait = 0;
+            MillisecondsToWrite = newMsToWrite;
+            MillisecondsToWait = 0;
         }
 
         public LyricString(string newLyric, int newMsToWrite, int newMsToWait)
         {
             Lyric = newLyric;
-            millisecondsToWrite = newMsToWrite;
-            millisecondsToWait = newMsToWait;
+            MillisecondsToWrite = newMsToWrite;
+            MillisecondsToWait = newMsToWait;
         }
     }
 }

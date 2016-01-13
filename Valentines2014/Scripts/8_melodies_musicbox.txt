@@ -1,10 +1,11 @@
 ﻿#MusicBox:Eight Melodies
-Media\8melodieswav.wav
+C:\Users\nmca\OneDrive\Music\Chrono Trigger\Chrono_Trigger_The_Place_We_Knew_OC_ReMix.mp3
 Take a melody\n| 3340| 900
 Simple as can be\n| 2083| 1763
 Give it some words and\n| 2324 | 1200
 Sweet harmony\n| 1400| 2043
 Raise | 900| 10
+#Tesr!
 your | 800| 50
 voices\n| 1600 | 50
 Love grows strong now,\n| 1549| 200

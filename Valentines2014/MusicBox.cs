@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 
 namespace Valentines2015
 {
@@ -12,6 +13,7 @@ namespace Valentines2015
     {
         public List<LyricString> Lyrics { get; set; }
         public string MusicFile { get; set; }
+        public Color? TextColor { get; set; }
 
         /// <summary>
         /// Create a new MusicBox from a collection of LyricStrings, and a file pointing to a playable music file.
@@ -60,7 +62,7 @@ namespace Valentines2015
                 {
                     return;
                 }
-                if (currentLine[0] == '#')
+                if (String.IsNullOrWhiteSpace(currentLine) || currentLine[0] == '#')
                 {
                     continue;
                 }
@@ -74,10 +76,25 @@ namespace Valentines2015
                     }
                     lineCount++;
                     continue;
-                }                
+                }       
+                if(lineCount == 1 && currentLine.Substring(0, 6) == "Color:")
+                {
+                    string colorString = currentLine.Substring(6);
+                    try
+                    {
+                        Color color = (Color)ColorConverter.ConvertFromString(colorString);
+                        TextColor = color;
+                    }
+                    catch(FormatException)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Found a text color in the file, but was unable to parse it. Color string was: " + colorString);
+                    }                    
+                    lineCount++;
+                    continue;
+                }         
 
                 //Splitting on pipes ( | ), because commas are valid in song lyrics. Pipes usually aren't.
-                string[] line = currentLine.Split('|');
+                    string[] line = currentLine.Split('|');
                 string lyric = line[0].Replace("\\n", "\n");
                 int writeTimeInMillis = Convert.ToInt32(line[1]);
                 int waitTimeInMillis = line.Length > 2 ? Convert.ToInt32(line[2]) : 0; //The waitTime is an optional value. If there's nothing there, set it to zero.

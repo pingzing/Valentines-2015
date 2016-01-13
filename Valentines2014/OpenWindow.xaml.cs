@@ -1,28 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using Valentines2014.Annotations;
+using Valentines2015.Annotations;
+using Valentines2015.MVVM;
 
 namespace Valentines2015
 {
     /// <summary>
     /// Interaction logic for OpenWindow.xaml
     /// </summary>
-    public partial class OpenWindow : Window, INotifyPropertyChanged
+    public partial class OpenWindow : BindableWindowBase
 
     {
         public MusicBoxScript ReturnSelection { get; set; }
@@ -38,20 +30,29 @@ namespace Valentines2015
             }
         }
 
-        private List<MusicBoxScript> scriptList;
+        private ObservableCollection<MusicBoxScript> _scriptList = new ObservableCollection<MusicBoxScript>();
+        public ObservableCollection<MusicBoxScript> ScriptList
+        {
+            get { return _scriptList; }
+            set
+            {
+                if (value != _scriptList)
+                {
+                    _scriptList = value;
+                    this.OnPropertyChanged();
+                }
+            }
+        }
 
         public OpenWindow()
         {
             InitializeComponent();
             this.DataContext = this; 
-            PopulateMusicBoxList();
-            MusicBoxListBox.ItemsSource = scriptList;
-            MusicBoxListBox.Items.Refresh();            
+            PopulateMusicBoxList();               
         }
 
         private void PopulateMusicBoxList()
-        {
-            scriptList = new List<MusicBoxScript>();
+        {            
             string searchDir = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Scripts");
             IEnumerable<string> txtFiles = Directory.EnumerateFiles(searchDir, "*.txt", SearchOption.TopDirectoryOnly);
             AddScriptFilesToListBox(txtFiles);
@@ -62,16 +63,21 @@ namespace Valentines2015
             List<string> failingFiles = new List<string>();
             foreach (var file in txtFiles)
             {
-                using (StreamReader rs = new StreamReader(file))
+                string newFilePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Scripts", Path.GetFileName(file));
+                if (!File.Exists(newFilePath))
+                {
+                    File.Copy(file, newFilePath, false);
+                }
+                 using (StreamReader rs = new StreamReader(newFilePath))
                 {
                     string header = rs.ReadLine(); //Line 1, header
                     if (header.Substring(0, 10) != "#MusicBox:")
                     {
-                        failingFiles.Add(file);
+                        failingFiles.Add(newFilePath);
                         continue;
                     }
                     string name = header.Substring(10);
-                    scriptList.Add(new MusicBoxScript { Name = name, Path = file });
+                    ScriptList.Add(new MusicBoxScript { Name = name, Path = newFilePath });
                 }
             }
 
@@ -109,18 +115,6 @@ namespace Valentines2015
             ReturnSelection = (MusicBoxScript)MusicBoxListBox.SelectedItem;
             this.DialogResult = true;
             this.Close();
-        }
-
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private void MusicBoxListBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
